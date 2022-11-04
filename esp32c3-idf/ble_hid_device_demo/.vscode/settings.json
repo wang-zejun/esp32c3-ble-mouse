@@ -1,0 +1,12 @@
+{
+  "C_Cpp.intelliSenseEngine": "Tag Parser",
+  "files.associations": {
+    "iot_button.h": "c"
+  },
+  "idf.adapterTargetName": "esp32c3",
+  "idf.openOcdConfigs": [
+    "board/esp32c3-builtin.cfg"
+  ],
+  "idf.flashType": "UART",
+  "idf.portWin": "COM1"
+}
