@@ -85,7 +85,7 @@ static bool send_volum_up = false;
 
 static void hidd_event_callback(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *param);
 
-#define HIDD_DEVICE_NAME            "ESP32C3-HID"
+#define HIDD_DEVICE_NAME            "ESP32C3"
 static uint8_t hidd_service_uuid128[] = {
     /* LSB <--------------------------------------------------------------------------------> MSB */
     //first uuid, 16bit, [12],[13] is the value
@@ -96,8 +96,8 @@ static esp_ble_adv_data_t hidd_adv_data = {
     .set_scan_rsp = false,
     .include_name = true,
     .include_txpower = true,
-    .min_interval = 0x0006, //slave connection min interval, Time = min_interval * 1.25 msec
-    .max_interval = 0x0010, //slave connection max interval, Time = max_interval * 1.25 msec
+    .min_interval = 0x0002, //slave connection min interval, Time = min_interval * 1.25 msec
+    .max_interval = 0x0006, //slave connection max interval, Time = max_interval * 1.25 msec
     .appearance = 0x03c0,       //HID Generic,
     .manufacturer_len = 0,
     .p_manufacturer_data =  NULL,
@@ -221,59 +221,126 @@ static void button_event(button_handle_t btn)
         ESP_LOGI(TAG, "BUTTON_CENTER");
         esp_hidd_send_mouse_value(hid_conn_id, 1, 0, 0, 0);
         esp_hidd_send_mouse_value(hid_conn_id, 0, 0, 0, 0);
+        break;
+    case 1:
+        ESP_LOGI(TAG, "BUTTON_UP");  
+        mouse_report |= (1<<0);
+        esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 0, 0);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        for(unsigned int i = 0; i < 3 ; i++) 
+        {
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, -30, 0);
+        }
+        mouse_report &= ~(1<<0);
+        esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 0, 0);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        for(unsigned int i = 0; i < 3 ; i++) 
+        {
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 30, 0);
+        }
+        break;
+    case 2:
+        ESP_LOGI(TAG, "BUTTON_DOWN");
+        mouse_report |= (1<<0);
+        esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 0, 0);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        for(unsigned int i = 0; i < 3 ; i++) 
+        {
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 30, 0);
+        }
+        mouse_report &= ~(1<<0);
+        esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 0, 0);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        for(unsigned int i = 0; i < 3 ; i++) 
+        {
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, -30, 0);
+        }
+        break;
+    case 3:
+        ESP_LOGI(TAG, "BUTTON_LEFT");
+        mouse_report |= (1<<0);
+        esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 0, 0);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        for(unsigned int i = 0; i < 3 ; i++) 
+        {
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, -30, 0, 0);
+        }
+        mouse_report &= ~(1<<0);
+        esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 0, 0);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        for(unsigned int i = 0; i < 3 ; i++) 
+        {
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 30, 0, 0);
+        }
+        break;
+    case 4:
+        ESP_LOGI(TAG, "BUTTON_RIGHT");
+        mouse_report |= (1<<0);
+        esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 0, 0);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        for(unsigned int i = 0; i < 3 ; i++) 
+        {
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 30, 0, 0);
+        }
+        mouse_report &= ~(1<<0);
+        esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 0, 0);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        for(unsigned int i = 0; i < 3 ; i++) 
+        {
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, -30, 0, 0);
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+static void button_double_event(button_handle_t btn)
+{
+    uint8_t key_vaule = 0, key_none = 0, x = 0;
+    uint8_t mouse_report = 0;
+    button_event_t evt = get_btn_index(btn);
+    switch (evt) {
+    case 0:
+        ESP_LOGI(TAG, "BUTTON_CENTER");
+        esp_hidd_send_mouse_value(hid_conn_id, 1, 0, 0, 0);
+        esp_hidd_send_mouse_value(hid_conn_id, 0, 0, 0, 0);
         vTaskDelay(100 / portTICK_PERIOD_MS);
         esp_hidd_send_mouse_value(hid_conn_id, 1, 0, 0, 0);
         esp_hidd_send_mouse_value(hid_conn_id, 0, 0, 0, 0);
         break;
     case 1:
         ESP_LOGI(TAG, "BUTTON_UP");  
-        mouse_report |= (1<<0);
-        esp_hidd_send_mouse_value(hid_conn_id, 1, 0, 0, 0);
-        for(unsigned int i = 0; i < 30 ; i++) 
-        {
-            esp_hidd_send_mouse_value(hid_conn_id, 1, 1, -10, 0);
-        }
         mouse_report &= ~(1<<0);
-        esp_hidd_send_mouse_value(hid_conn_id, 0, 0, 0, 0);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        for(unsigned int i = 0; i < 30 ; i++) 
+        for(unsigned int i = 0; i < 3 ; i++) 
         {
-            esp_hidd_send_mouse_value(hid_conn_id, 0, -1, 10, 0);
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 0, 30);
         }
         break;
     case 2:
         ESP_LOGI(TAG, "BUTTON_DOWN");
-        mouse_report |= (1<<0);
-        esp_hidd_send_mouse_value(hid_conn_id, 1, 0, 0, 0);
-        for(unsigned int i = 0; i < 30 ; i++) 
-        {
-            esp_hidd_send_mouse_value(hid_conn_id, 1, 0, 10, 0);
-        }
         mouse_report &= ~(1<<0);
-        esp_hidd_send_mouse_value(hid_conn_id, 0, 0, 0, 0);
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-        for(unsigned int i = 0; i < 30 ; i++) 
+        for(unsigned int i = 0; i < 3 ; i++) 
         {
-            esp_hidd_send_mouse_value(hid_conn_id, 0, 0, -10, 0);
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 0, 0, -30);
         }
         break;
     case 3:
         ESP_LOGI(TAG, "BUTTON_LEFT");
-        // for(unsigned int i = 0; i < 100 ; i++) 
-        // {
-        //     esp_hidd_send_mouse_value(hid_conn_id, 0, -1, 0, 0);
-        // }
-        esp_hidd_send_mouse_value(hid_conn_id, 0, 0, 0, 0);
-        esp_hidd_send_mouse_value(hid_conn_id, HID_MOUSE_LEFT, 0, 0, 0);
-        esp_hidd_send_mouse_value(hid_conn_id, 0, 0, 0, 0);
+        mouse_report &= ~(1<<0);
+        for(unsigned int i = 0; i < 3 ; i++) 
+        {
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, -30, 0, 0);
+        }
         break;
     case 4:
         ESP_LOGI(TAG, "BUTTON_RIGHT");
-        for(unsigned int i = 0; i < 100 ; i++) 
+        mouse_report &= ~(1<<0);
+        for(unsigned int i = 0; i < 3 ; i++) 
         {
-            esp_hidd_send_mouse_value(hid_conn_id, 0, 1, 0, 0);
+            esp_hidd_send_mouse_value(hid_conn_id, mouse_report, 30, 0, 0);
         }
-
         break;
 
     default:
@@ -309,6 +376,7 @@ static void button_double_click_cb(void *arg)
 {
     TEST_ASSERT_EQUAL_HEX(BUTTON_DOUBLE_CLICK, iot_button_get_event(arg));
     ESP_LOGI(TAG, "BTN%d: BUTTON_DOUBLE_CLICK", get_btn_index((button_handle_t)arg));
+    button_double_event((button_handle_t)arg);
 }
 
 static void button_long_press_start_cb(void *arg)
