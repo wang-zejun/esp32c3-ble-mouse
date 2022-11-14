@@ -369,14 +369,14 @@ static void button_single_click_cb(void *arg)
 {
     TEST_ASSERT_EQUAL_HEX(BUTTON_SINGLE_CLICK, iot_button_get_event(arg));
     ESP_LOGI(TAG, "BTN%d: BUTTON_SINGLE_CLICK", get_btn_index((button_handle_t)arg));
-    button_event((button_handle_t)arg);
+    // button_event((button_handle_t)arg);
 }
 
 static void button_double_click_cb(void *arg)
 {
     TEST_ASSERT_EQUAL_HEX(BUTTON_DOUBLE_CLICK, iot_button_get_event(arg));
     ESP_LOGI(TAG, "BTN%d: BUTTON_DOUBLE_CLICK", get_btn_index((button_handle_t)arg));
-    button_double_event((button_handle_t)arg);
+    // button_double_event((button_handle_t)arg);
 }
 
 static void button_long_press_start_cb(void *arg)
@@ -462,58 +462,113 @@ void app_main(void)
             .active_level = BUTTON_ACTIVE_LEVEL,
         },
     };
-    g_btns[0] = iot_button_create(&cfg_center);
-    TEST_ASSERT_NOT_NULL(g_btns[0]);
-    iot_button_register_cb(g_btns[0], BUTTON_SINGLE_CLICK, button_single_click_cb);
-    iot_button_register_cb(g_btns[0], BUTTON_DOUBLE_CLICK, button_double_click_cb);
+    g_btns[8] = iot_button_create(&cfg_center);
+    TEST_ASSERT_NOT_NULL(g_btns[8]);
+    iot_button_register_cb(g_btns[8], BUTTON_SINGLE_CLICK, button_single_click_cb);
+    iot_button_register_cb(g_btns[8], BUTTON_DOUBLE_CLICK, button_double_click_cb);
 
-    button_config_t cfg_up = {
-        .type = BUTTON_TYPE_GPIO,
-        .gpio_button_config = {
-            .gpio_num = BUTTON_UP,
-            .active_level = BUTTON_ACTIVE_LEVEL,
-        },
-    };
-    g_btns[1] = iot_button_create(&cfg_up);
-    TEST_ASSERT_NOT_NULL(g_btns[1]);
-    iot_button_register_cb(g_btns[1], BUTTON_SINGLE_CLICK, button_single_click_cb);
-    iot_button_register_cb(g_btns[1], BUTTON_DOUBLE_CLICK, button_double_click_cb);
+    const uint16_t vol[2] = {8, 3300};
+    button_config_t cfg = {0};
+    cfg.type = BUTTON_TYPE_ADC;
+    for (size_t i = 0; i < 2; i++) {
+        cfg.adc_button_config.adc_channel = 3,
+        cfg.adc_button_config.button_index = i;
+        if (i == 0) {
+            cfg.adc_button_config.min = (0 + vol[i]) / 2;
+        } else {
+            cfg.adc_button_config.min = (1650 + vol[i]) / 2;
+        }
 
-    button_config_t cfg_down = {
-        .type = BUTTON_TYPE_GPIO,
-        .gpio_button_config = {
-            .gpio_num = BUTTON_DOWN,
-            .active_level = BUTTON_ACTIVE_LEVEL,
-        },
-    };
-    g_btns[2] = iot_button_create(&cfg_down);
-    TEST_ASSERT_NOT_NULL(g_btns[2]);
-    iot_button_register_cb(g_btns[2], BUTTON_SINGLE_CLICK, button_single_click_cb);
-    iot_button_register_cb(g_btns[2], BUTTON_DOUBLE_CLICK, button_double_click_cb);
+        if (i == 1) {
+            cfg.adc_button_config.max = (vol[i] + 3300) / 2;
+        } else {
+            cfg.adc_button_config.max = (vol[i] + 1650) / 2;
+        }
 
-    button_config_t cfg_left = {
-        .type = BUTTON_TYPE_GPIO,
-        .gpio_button_config = {
-            .gpio_num = BUTTON_LEFT,
-            .active_level = BUTTON_ACTIVE_LEVEL,
-        },
-    };
-    g_btns[3] = iot_button_create(&cfg_left);
-    TEST_ASSERT_NOT_NULL(g_btns[3]);
-    iot_button_register_cb(g_btns[3], BUTTON_SINGLE_CLICK, button_single_click_cb);
-    iot_button_register_cb(g_btns[3], BUTTON_DOUBLE_CLICK, button_double_click_cb);
+        g_btns[i] = iot_button_create(&cfg);
+        TEST_ASSERT_NOT_NULL(g_btns[i]);
+        iot_button_register_cb(g_btns[i], BUTTON_PRESS_DOWN, button_press_down_cb);
+        iot_button_register_cb(g_btns[i], BUTTON_PRESS_UP, button_press_up_cb);
+        iot_button_register_cb(g_btns[i], BUTTON_PRESS_REPEAT, button_press_repeat_cb);
+        iot_button_register_cb(g_btns[i], BUTTON_SINGLE_CLICK, button_single_click_cb);
+        iot_button_register_cb(g_btns[i], BUTTON_DOUBLE_CLICK, button_double_click_cb);
+        iot_button_register_cb(g_btns[i], BUTTON_LONG_PRESS_START, button_long_press_start_cb);
+        iot_button_register_cb(g_btns[i], BUTTON_LONG_PRESS_HOLD, button_long_press_hold_cb);
+    }
 
-    button_config_t cfg_right = {
-        .type = BUTTON_TYPE_GPIO,
-        .gpio_button_config = {
-            .gpio_num = BUTTON_RIGHT,
-            .active_level = BUTTON_ACTIVE_LEVEL,
-        },
-    };
-    g_btns[4] = iot_button_create(&cfg_right);
-    TEST_ASSERT_NOT_NULL(g_btns[4]);
-    iot_button_register_cb(g_btns[4], BUTTON_SINGLE_CLICK, button_single_click_cb);
-    iot_button_register_cb(g_btns[4], BUTTON_DOUBLE_CLICK, button_double_click_cb);
+    for (size_t i = 0; i < 2; i++) {
+        cfg.adc_button_config.adc_channel = 2,
+        cfg.adc_button_config.button_index = i;
+        if (i == 0) {
+            cfg.adc_button_config.min = (0 + vol[i]) / 2;
+        } else {
+            cfg.adc_button_config.min = (1600 + vol[i]) / 2;
+        }
+
+        if (i == 1) {
+            cfg.adc_button_config.max = (vol[i] + 3000) / 2;
+        } else {
+            cfg.adc_button_config.max = (vol[i] + 2500) / 2;
+        }
+
+        g_btns[i+2] = iot_button_create(&cfg);
+        TEST_ASSERT_NOT_NULL(g_btns[i+2]);
+        iot_button_register_cb(g_btns[i+2], BUTTON_PRESS_DOWN, button_press_down_cb);
+        iot_button_register_cb(g_btns[i+2], BUTTON_PRESS_UP, button_press_up_cb);
+        iot_button_register_cb(g_btns[i+2], BUTTON_PRESS_REPEAT, button_press_repeat_cb);
+        iot_button_register_cb(g_btns[i+2], BUTTON_SINGLE_CLICK, button_single_click_cb);
+        iot_button_register_cb(g_btns[i+2], BUTTON_DOUBLE_CLICK, button_double_click_cb);
+        iot_button_register_cb(g_btns[i+2], BUTTON_LONG_PRESS_START, button_long_press_start_cb);
+        iot_button_register_cb(g_btns[i+2], BUTTON_LONG_PRESS_HOLD, button_long_press_hold_cb);
+    }
+
+    // button_config_t cfg_up = {
+    //     .type = BUTTON_TYPE_GPIO,
+    //     .gpio_button_config = {
+    //         .gpio_num = BUTTON_UP,
+    //         .active_level = BUTTON_ACTIVE_LEVEL,
+    //     },
+    // };
+    // g_btns[1] = iot_button_create(&cfg_up);
+    // TEST_ASSERT_NOT_NULL(g_btns[1]);
+    // iot_button_register_cb(g_btns[1], BUTTON_SINGLE_CLICK, button_single_click_cb);
+    // iot_button_register_cb(g_btns[1], BUTTON_DOUBLE_CLICK, button_double_click_cb);
+
+    // button_config_t cfg_down = {
+    //     .type = BUTTON_TYPE_GPIO,
+    //     .gpio_button_config = {
+    //         .gpio_num = BUTTON_DOWN,
+    //         .active_level = BUTTON_ACTIVE_LEVEL,
+    //     },
+    // };
+    // g_btns[2] = iot_button_create(&cfg_down);
+    // TEST_ASSERT_NOT_NULL(g_btns[2]);
+    // iot_button_register_cb(g_btns[2], BUTTON_SINGLE_CLICK, button_single_click_cb);
+    // iot_button_register_cb(g_btns[2], BUTTON_DOUBLE_CLICK, button_double_click_cb);
+
+    // button_config_t cfg_left = {
+    //     .type = BUTTON_TYPE_GPIO,
+    //     .gpio_button_config = {
+    //         .gpio_num = BUTTON_LEFT,
+    //         .active_level = BUTTON_ACTIVE_LEVEL,
+    //     },
+    // };
+    // g_btns[3] = iot_button_create(&cfg_left);
+    // TEST_ASSERT_NOT_NULL(g_btns[3]);
+    // iot_button_register_cb(g_btns[3], BUTTON_SINGLE_CLICK, button_single_click_cb);
+    // iot_button_register_cb(g_btns[3], BUTTON_DOUBLE_CLICK, button_double_click_cb);
+
+    // button_config_t cfg_right = {
+    //     .type = BUTTON_TYPE_GPIO,
+    //     .gpio_button_config = {
+    //         .gpio_num = BUTTON_RIGHT,
+    //         .active_level = BUTTON_ACTIVE_LEVEL,
+    //     },
+    // };
+    // g_btns[4] = iot_button_create(&cfg_right);
+    // TEST_ASSERT_NOT_NULL(g_btns[4]);
+    // iot_button_register_cb(g_btns[4], BUTTON_SINGLE_CLICK, button_single_click_cb);
+    // iot_button_register_cb(g_btns[4], BUTTON_DOUBLE_CLICK, button_double_click_cb);
 
     xTaskCreate(&hid_demo_task, "hid_task", 2048, NULL, 5, NULL);
 }

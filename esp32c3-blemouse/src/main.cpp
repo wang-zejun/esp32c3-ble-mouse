@@ -9,8 +9,12 @@ BleMouse bleMouse;
 #define board_DOWN         5
 #define board_LEFT         8
 #define board_RIGHT        13 //13
-#define board_led_left    12
-#define board_led_right   7
+#define board_led_left     12
+#define board_led_right    13
+
+const int x = 3;
+const int y = 5;
+const int key = 4;
 
 void(* resetFunc) (void) = 0;
 
@@ -20,10 +24,10 @@ unsigned long startTime, temp , ttt;
 
 void setup() {
   pinMode(board_CENTER, INPUT_PULLUP);
-  pinMode(board_UP, INPUT_PULLUP);
-  pinMode(board_DOWN, INPUT_PULLUP);
-  pinMode(board_LEFT, INPUT_PULLUP);
-  pinMode(board_RIGHT, INPUT_PULLUP);
+  // pinMode(board_UP, INPUT_PULLUP);
+  // pinMode(board_DOWN, INPUT_PULLUP);
+  // pinMode(board_LEFT, INPUT_PULLUP);
+  // pinMode(board_RIGHT, INPUT_PULLUP);
   pinMode(board_led_left, OUTPUT);
   pinMode(board_led_right, OUTPUT);
   Serial.begin(115200);
@@ -32,14 +36,16 @@ void setup() {
   reset = 0;
 }
 void loop() {
+
   if(bleMouse.isConnected()) {
 
     reset = 1;
 
     digitalWrite(board_led_left, HIGH);
-    
-    if (digitalRead(board_UP) != HIGH) { 
-      while (digitalRead(board_UP) != HIGH);
+    // if (digitalRead(board_UP) != HIGH) { 
+    //   while (digitalRead(board_UP) != HIGH);
+    if (analogRead(x) < 500 ) { 
+      while (analogRead(x) < 500);
       Serial.println("Scroll up");
       startTime = millis();
       while(millis()<startTime+196) {
@@ -48,8 +54,10 @@ void loop() {
       }
     }
 
-    if (digitalRead(board_DOWN) != HIGH) { 
-      while (digitalRead(board_DOWN) != HIGH);
+    // if (digitalRead(board_DOWN) != HIGH) { 
+    //   while (digitalRead(board_DOWN) != HIGH);
+    if (analogRead(x) > 4000) { 
+      while (analogRead(x) > 4000);
       Serial.println("Scroll down");
       startTime = millis();
       while(millis()<startTime+196) {
@@ -58,8 +66,10 @@ void loop() {
       }
     }
 
-    if (digitalRead(board_LEFT) != HIGH) { 
-      while (digitalRead(board_LEFT) != HIGH);
+    // if (digitalRead(board_LEFT) != HIGH) { 
+    //   while (digitalRead(board_LEFT) != HIGH);
+    if (analogRead(y) > 4000) { 
+      while (analogRead(y) > 4000);
       // Serial.println("Move mouse pointer left");
       // startTime = millis();
       // while(millis()<startTime+2000) {
@@ -87,8 +97,10 @@ void loop() {
       }
     }
 
-    if (digitalRead(board_RIGHT) != HIGH) { 
-      while (digitalRead(board_RIGHT) != HIGH);
+    // if (digitalRead(board_RIGHT) != HIGH) { 
+    //   while (digitalRead(board_RIGHT) != HIGH);
+    if (analogRead(y) < 500) { 
+      while (analogRead(y) < 500);
       Serial.println("Move mouse pointer right");
       startTime = millis();
       while(millis()<startTime+2000) {
