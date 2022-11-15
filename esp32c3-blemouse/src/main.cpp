@@ -122,21 +122,25 @@ void loop() {
     if (analogRead(x) < 100 ) { 
       while (analogRead(x) < 100);
       slide(UP);
+      delay(500);
     }
 
     if (analogRead(x) > 4000) { 
       while (analogRead(x) > 4000);
       slide(DOWN);
+      delay(500);
     }
 
     if (analogRead(y) > 4000) { 
       while (analogRead(y) > 4000);
       slide(LEFT);
+      delay(500);
     }
 
     if (analogRead(y) < 100) { 
       while (analogRead(y) < 100);
       slide(RIGHT);
+      delay(500);
     }
 
     if (digitalRead(board_CENTER) != HIGH) { 
